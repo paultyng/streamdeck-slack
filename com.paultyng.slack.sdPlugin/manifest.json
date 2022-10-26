@@ -1,0 +1,85 @@
+{
+  "Actions": [
+    {
+      "Icon": "actionIcon",
+      "Name": "Slack Status",
+      "States": [
+        {
+          "Image": "actionInactive",
+          "TitleAlignment": "middle",
+          "FontSize": "16",
+          "Name": "Set status"
+        },
+        {
+          "Image": "actionActive",
+          "TitleAlignment": "middle",
+          "FontSize": "16",
+          "Name": "Clear status"
+        }
+      ],
+      "Tooltip": "Toggle a Slack profile status on or off.",
+      "UUID": "com.paultyng.slack.status",
+      "PropertyInspectorPath": "status_pi.html"
+    },
+    {
+      "Icon": "actionIcon",
+      "Name": "Slack User",
+      "States": [
+        {
+          "Image": "actionIcon",
+          "TitleAlignment": "middle",
+          "FontSize": "16",
+          "Name": "Slack User"
+        }
+      ],
+      "Tooltip": "See a user's current status and DM them.",
+      "UUID": "com.paultyng.slack.user",
+      "PropertyInspectorPath": "user_pi.html"
+    },
+    {
+      "Icon": "actionIcon",
+      "Name": "Slack Presence",
+      "States": [
+        {
+          "Image": "presenceActiveIcon",
+          "TitleAlignment": "middle",
+          "FontSize": "16",
+          "Name": "Set away"
+        },
+        {
+          "Image": "presenceAwayIcon",
+          "TitleAlignment": "middle",
+          "FontSize": "16",
+          "Name": "Set back"
+        }
+      ],
+      "Tooltip": "Toggle a Slack presence to away or back/auto.",
+      "UUID": "com.paultyng.slack.presence",
+      "PropertyInspectorPath": "presence_pi.html"
+    }
+  ],
+  "SDKVersion": 2,
+  "Author": "Paul Tyng",
+  "Category": "Slack",
+  "CategoryIcon": "categoryIcon",
+  "CodePathWin": "streamdeck-slack.exe",
+  "CodePathMac": "streamdeck-slack",
+  "Description": "Use Slack with your Stream Deck!",
+  "Name": "Slack",
+  "Icon": "pluginIcon",
+  "URL": "https://github.com/paultyng/streamdeck-slack",
+  "Version": "1.0",
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "10.11"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "4.1"
+  }
+}

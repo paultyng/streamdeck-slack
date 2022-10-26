@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>com.paultyng.slack.status Property Inspector</title>
+    <link rel="stylesheet" href="sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">API Token</div>
+            <!-- TODO: pattern... -->
+            <input class="sdpi-item-value" id="api-token" value="" placeholder="xoxp-xxxxxxxxxxx"
+                onchange="sendValueToPlugin(event.target.value, 'api-token')" required>
+        </div>
+        <div type="group" class="sdpi-item" id="status-group">
+            <div class="sdpi-item-label">Status</div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">Emoji</div>
+                <input class="sdpi-item-value" id="status-emoji" value="" placeholder=":palm_tree:"
+                    onchange="sendValueToPlugin(event.target.value, 'status-emoji')" required pattern=":.+:">
+            </div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">Text</div>
+                <input class="sdpi-item-value" id="status-text" value="" placeholder="breaktime"
+                    onchange="sendValueToPlugin(event.target.value, 'status-text')" required>
+            </div>
+        </div>
+    </div>
+    <details>
+        <summary>TODO: how to get token</summary>
+    </details>
+
+    <script>
+        let websocket = null, uuid = null, actionInfo = {};
+
+        const apiToken = document.querySelector("#api-token");
+        const statusEmoji = document.querySelector("#status-emoji");
+        const statusText = document.querySelector("#status-text");
+
+        function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+            uuid = inUUID;
+            actionInfo = JSON.parse(inActionInfo); // cache the info
+            websocket = new WebSocket('ws://localhost:' + inPort);
+
+            websocket.onopen = function () {
+                var json = {
+                    event: inRegisterEvent,
+                    uuid: inUUID
+                };
+                websocket.send(JSON.stringify(json));
+            }
+
+            const settings = actionInfo.payload.settings;
+
+            apiToken.value = settings['api-token'];
+            statusEmoji.value = settings['status-emoji'];
+            statusText.value = settings['status-text'];
+        }
+
+        function sendValueToPlugin(value, param) {
+            if (websocket) {
+                const json = {
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": {
+                        [param]: value
+                    }
+                };
+                websocket.send(JSON.stringify(json));
+            }
+        }
+    </script>
+
+</body>
+
+</html>

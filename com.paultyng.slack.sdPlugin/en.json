@@ -1,0 +1,8 @@
+{
+  "Description": "Manage your Slack presence",
+  "Name": "Slack",
+  "com.paultyng.slack.status": {
+    "Name": "Slack Status",
+    "Tooltip": "Toggle a Slack status in your profile."
+  }
+}

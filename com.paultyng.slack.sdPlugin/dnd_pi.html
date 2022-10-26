@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>com.paultyng.slack.dnd Property Inspector</title>
+    <link rel="stylesheet" href="sdpi.css">
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">API Token</div>
+            <!-- TODO: pattern... -->
+            <input class="sdpi-item-value" id="api-token" value="" placeholder="xoxp-xxxxxxxxxxx"
+                onchange="sendValueToPlugin(event.target.value, 'api-token')" required>
+        </div>
+    </div>
+    <details>
+        <summary>TODO: how to get token</summary>
+    </details>
+
+    <script>
+        let websocket = null, uuid = null, actionInfo = {};
+
+        const apiToken = document.querySelector("#api-token");
+
+        function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+            uuid = inUUID;
+            actionInfo = JSON.parse(inActionInfo); // cache the info
+            websocket = new WebSocket('ws://localhost:' + inPort);
+
+            websocket.onopen = function () {
+                var json = {
+                    event: inRegisterEvent,
+                    uuid: inUUID
+                };
+                websocket.send(JSON.stringify(json));
+            }
+
+            const settings = actionInfo.payload.settings;
+
+            apiToken.value = settings['api-token'];
+        }
+
+        function sendValueToPlugin(value, param) {
+            if (websocket) {
+                const json = {
+                    "action": actionInfo['action'],
+                    "event": "sendToPlugin",
+                    "context": uuid,
+                    "payload": {
+                        [param]: value
+                    }
+                };
+                websocket.send(JSON.stringify(json));
+            }
+        }
+    </script>
+
+</body>
+
+</html>
