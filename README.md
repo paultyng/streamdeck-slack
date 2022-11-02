@@ -14,8 +14,3 @@ The actions all require a user token with the following scopes:
 - `users.profile:write` - for writing custom status
 - `users:read`
 - `users:write` - for updating presence information
-
-## Some things to investigate
-
-- [ ] Socket Mode / RTM for presence? Is this possible?
-- [ ] Automatically pull the Status emoji images for the Status action (this is limited by the public API, but could add a hardcoded list of the emoji mappings)
