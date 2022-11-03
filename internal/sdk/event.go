@@ -26,18 +26,6 @@ type EventHandler interface {
 	Handle(interface{})
 }
 
-// EventInterfaceProvider is an interface for providing empty interfaces for
-// Discord event
-type EventInterfaceProvider interface {
-	// Type is the type of event this handler belongs to.
-	Type() string
-
-	// New returns a new instance of the struct this event handler handle
-	// This is called once per event.
-	// The struct is provided to all handlers of the same Type().
-	New() interface{}
-}
-
 // interfaceEventType is the event handler type for interface{} event
 const interfaceEventType = "__INTERFACE__"
 
@@ -52,21 +40,6 @@ func (eh interfaceEventHandler) Type() string {
 // Handle is the handler for an interface{} event.
 func (eh interfaceEventHandler) Handle(i interface{}) {
 	eh(i)
-}
-
-var registeredInterfaceProviders = map[string]EventInterfaceProvider{}
-
-// registerInterfaceProvider registers a provider so that DiscordGo can
-// access it's New() method.
-func registerInterfaceProvider(eh EventInterfaceProvider) {
-	if _, ok := registeredInterfaceProviders[eh.Type()]; ok {
-		return
-		// XXX:
-		// if we should error here, we need to do something with it.
-		// fmt.Errorf("event %s already registered", eh.Type())
-	}
-	registeredInterfaceProviders[eh.Type()] = eh
-	return
 }
 
 // eventHandlerInstance is a wrapper around an event handler, as functions

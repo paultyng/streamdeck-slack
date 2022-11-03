@@ -7,7 +7,7 @@ import (
 
 	"github.com/valyala/fastjson"
 
-	"streamdeck-slack/sdk"
+	"streamdeck-slack/internal/sdk"
 )
 
 func main() {
@@ -71,7 +71,11 @@ func actionFor(action, context, deviceID string) streamDeckAction {
 
 	if f, ok := factories[action]; ok {
 		a := f()
-		a.Initialize(action, context, deviceID)
+		err := a.Initialize(action, context, deviceID)
+		if err != nil {
+			handleError(context, err)
+			return nil
+		}
 		actions[context] = a
 		return a
 	}
@@ -270,7 +274,8 @@ func logHandler(name, action, context, deviceID string, payload *fastjson.Value)
 
 func handleError(context string, err error) {
 	if context != "" {
-		sdk.ShowAlert(context)
+		// ignore any error here
+		_ = sdk.ShowAlert(context)
 	}
 	sdk.Log(fmt.Sprintf("Error: %v", err))
 }

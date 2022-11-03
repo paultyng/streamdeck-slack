@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"streamdeck-slack/sdk"
+	"streamdeck-slack/internal/sdk"
 	"sync"
 
 	"github.com/slack-go/slack"
@@ -28,7 +28,10 @@ func (a *presenceAction) Initialize(action, context, deviceID string) error {
 	a.action = action
 	a.context = context
 
-	sdk.GetSettings(a.context)
+	err := sdk.GetSettings(a.context)
+	if err != nil {
+		return fmt.Errorf("unable to get settings: %w", err)
+	}
 
 	return nil
 }
@@ -77,10 +80,16 @@ func (a *presenceAction) UpdateSettings(settings *fastjson.Object) error {
 	a.init.Do(func() {
 		if !presence.ManualAway {
 			sdk.Log("Found auto away")
-			sdk.SetState(a.context, stateInactive)
+			err := sdk.SetState(a.context, stateInactive)
+			if err != nil {
+				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+			}
 		} else {
 			sdk.Log("Found manual away")
-			sdk.SetState(a.context, stateActive)
+			err := sdk.SetState(a.context, stateActive)
+			if err != nil {
+				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+			}
 		}
 	})
 
@@ -141,9 +150,12 @@ func (a *presenceAction) SendToPlugin(payload *fastjson.Object) error {
 		return fmt.Errorf("unable to update settings in send to plugin: %w", err)
 	}
 
-	sdk.SetSettings(a.context, map[string]string{
+	err = sdk.SetSettings(a.context, map[string]string{
 		"api-token": a.apiKey,
 	})
+	if err != nil {
+		return fmt.Errorf("unable to set settings: %w", err)
+	}
 	return nil
 }
 func (a *presenceAction) WillAppear(*fastjson.Object) error {

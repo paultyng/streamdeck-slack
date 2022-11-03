@@ -12,7 +12,7 @@ import (
 var (
 	flagPort  = flag.Int("port", 0, "streamdeck sdk port")
 	flagEvent = flag.String("registerEvent", "", "streamdeck sdk register event")
-	flagInfo  = flag.String("info", "", "streamdeck application info")
+	// flagInfo  = flag.String("info", "", "streamdeck application info")
 
 	PluginUUID string
 
@@ -39,9 +39,7 @@ func Open() error {
 
 	go reader()
 
-	c.WriteJSON(&openMessage{Event: *flagEvent, UUID: PluginUUID})
-
-	return nil
+	return c.WriteJSON(&openMessage{Event: *flagEvent, UUID: PluginUUID})
 }
 
 // Waits for either the socket to close, or SIGINT/SIGTERM.

@@ -5,7 +5,7 @@ package main
 import (
 	"fmt"
 
-	"streamdeck-slack/sdk"
+	"streamdeck-slack/internal/sdk"
 )
 
 func openDM(team, user string) error {

@@ -18,7 +18,7 @@ import (
 	"github.com/valyala/fastjson"
 	xdraw "golang.org/x/image/draw"
 
-	"streamdeck-slack/sdk"
+	"streamdeck-slack/internal/sdk"
 )
 
 var emojiColonSyntaxRe = regexp.MustCompile(`^:([^:]+):(:([^:]+):)?$`)
@@ -50,7 +50,10 @@ func (a *userAction) Initialize(action, context, deviceID string) error {
 	a.action = action
 	a.context = context
 
-	sdk.GetSettings(a.context)
+	err := sdk.GetSettings(a.context)
+	if err != nil {
+		return fmt.Errorf("unable to get settings: %w", err)
+	}
 
 	return nil
 }
@@ -179,10 +182,13 @@ func (a *userAction) SendToPlugin(payload *fastjson.Object) error {
 		return fmt.Errorf("unable to update settings in send to plugin: %w", err)
 	}
 
-	sdk.SetSettings(a.context, map[string]string{
+	err = sdk.SetSettings(a.context, map[string]string{
 		"api-token": a.apiKey,
 		"user":      a.user,
 	})
+	if err != nil {
+		return fmt.Errorf("unable to set settings: %w", err)
+	}
 	return nil
 }
 func (a *userAction) WillAppear(*fastjson.Object) error {

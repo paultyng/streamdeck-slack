@@ -7,7 +7,7 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/valyala/fastjson"
 
-	"streamdeck-slack/sdk"
+	"streamdeck-slack/internal/sdk"
 )
 
 const (
@@ -35,7 +35,10 @@ func (a *statusAction) Initialize(action, context, deviceID string) error {
 	a.action = action
 	a.context = context
 
-	sdk.GetSettings(a.context)
+	err := sdk.GetSettings(a.context)
+	if err != nil {
+		return fmt.Errorf("unable to get settings: %w", err)
+	}
 
 	return nil
 }
@@ -86,10 +89,16 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 
 		if profile.StatusEmoji != a.emoji {
 			sdk.Log("Setting inactive state")
-			sdk.SetState(a.context, stateInactive)
+			err := sdk.SetState(a.context, stateInactive)
+			if err != nil {
+				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+			}
 		} else {
 			sdk.Log("Setting active state")
-			sdk.SetState(a.context, stateActive)
+			err := sdk.SetState(a.context, stateActive)
+			if err != nil {
+				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+			}
 		}
 	})
 
@@ -150,11 +159,14 @@ func (a *statusAction) SendToPlugin(payload *fastjson.Object) error {
 		return fmt.Errorf("unable to update settings in send to plugin: %w", err)
 	}
 
-	sdk.SetSettings(a.context, map[string]string{
+	err = sdk.SetSettings(a.context, map[string]string{
 		"api-token":    a.apiKey,
 		"status-text":  a.statusText,
 		"status-emoji": a.emoji,
 	})
+	if err != nil {
+		return fmt.Errorf("unable to set settings: %w", err)
+	}
 	return nil
 }
 func (a *statusAction) WillAppear(*fastjson.Object) error {
