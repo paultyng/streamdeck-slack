@@ -6,34 +6,6 @@ on:
       - "v*.*.*"
 
 jobs:
-  package-macos:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Unshallow
-        run: git fetch --prune --unshallow
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version-file: "go.mod"
-          cache: true
-          check-latest: true
-      - name: Build Executable
-        run: |
-          go build -o ./com.paultyng.slack.sdPlugin/streamdeck-slack
-
-      # TODO: set version in manifest
-
-      - name: Package Plugin
-        run: |
-          mkdir -p ./dist/
-          cat ./com.paultyng.slack.sdPlugin/manifest.json
-          ./tools/DistributionTool -b -i ./com.paultyng.slack.sdPlugin -o ./dist/
-      - name: Upload Asset
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/com.paultyng.sdPlugin.streamDeckPlugin
   package-windows:
     runs-on: windows-latest
     steps:
@@ -47,9 +19,15 @@ jobs:
           go-version-file: "go.mod"
           cache: true
           check-latest: true
-      - name: Build Executable
+      - name: Build Executable (windows)
         run: |
-          go build -o ./com.paultyng.slack.sdPlugin/streamdeck-slack.exe
+          go build -o ./com.paultyng.slack.sdPlugin/
+      - name: Build Executable (darwin)
+        env:
+          GOOS: darwin
+          GOARCH: amd64 # arm?
+        run: |
+          go build -o ./com.paultyng.slack.sdPlugin/
 
       # TODO: set version in manifest
 
