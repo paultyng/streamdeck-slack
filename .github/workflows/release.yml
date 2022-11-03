@@ -34,7 +34,7 @@ jobs:
           $version = git describe --tags
           $version = $version.Trim("v")
           Write-Output $version
-          jq ".Version=`"$version`"" ./manifest.json > ./com.paultyng.slack.sdPlugin/manifest.json
+          jq ".Version=\`"$version\`"" ./manifest.json > ./com.paultyng.slack.sdPlugin/manifest.json
       - name: Package Plugin
         run: |
           mkdir -p ./dist/
