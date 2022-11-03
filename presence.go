@@ -82,13 +82,13 @@ func (a *presenceAction) UpdateSettings(settings *fastjson.Object) error {
 			sdk.Log("Found auto away")
 			err := sdk.SetState(a.context, stateInactive)
 			if err != nil {
-				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+				handleError(a.context, fmt.Errorf("unable to set state: %w", err))
 			}
 		} else {
 			sdk.Log("Found manual away")
 			err := sdk.SetState(a.context, stateActive)
 			if err != nil {
-				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+				handleError(a.context, fmt.Errorf("unable to set state: %w", err))
 			}
 		}
 	})

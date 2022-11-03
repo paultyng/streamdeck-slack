@@ -91,13 +91,13 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 			sdk.Log("Setting inactive state")
 			err := sdk.SetState(a.context, stateInactive)
 			if err != nil {
-				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+				handleError(a.context, fmt.Errorf("unable to set state: %w", err))
 			}
 		} else {
 			sdk.Log("Setting active state")
 			err := sdk.SetState(a.context, stateActive)
 			if err != nil {
-				sdk.Log(fmt.Sprintf("unable to set state: %w", err))
+				handleError(a.context, fmt.Errorf("unable to set state: %w", err))
 			}
 		}
 	})
