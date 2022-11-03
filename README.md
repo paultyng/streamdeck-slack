@@ -1,4 +1,4 @@
-[![.github/workflows/ci.yml](https://github.com/paultyng/streamdeck-slack/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/paultyng/streamdeck-slack/actions/workflows/ci.yml)
+[![CI](https://github.com/paultyng/streamdeck-slack/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/paultyng/streamdeck-slack/actions/workflows/ci.yml)
 
 # Stream Deck Plugin for Slack
 
