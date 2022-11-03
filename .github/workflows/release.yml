@@ -40,8 +40,7 @@ jobs:
           mkdir -p ./dist/
           jq . ./com.paultyng.slack.sdPlugin/manifest.json
           ./tools/DistributionTool.exe -b -i ./com.paultyng.slack.sdPlugin -o ./dist/
-          ls ./dist/
       - name: Upload Asset
         uses: softprops/action-gh-release@v1
         with:
-          files: ./dist/com.paultyng.slack.sdPlugin.streamDeckPlugin
+          files: ./dist/com.paultyng.slack.streamDeckPlugin
