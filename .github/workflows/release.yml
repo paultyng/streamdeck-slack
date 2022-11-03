@@ -28,6 +28,7 @@ jobs:
       - name: Package Plugin
         run: |
           mkdir -p ./dist/
+          cat ./com.paultyng.slack.sdPlugin/manifest.json
           ./tools/DistributionTool -b -i ./com.paultyng.slack.sdPlugin -o ./dist/
       - name: Upload Asset
         uses: softprops/action-gh-release@v1
