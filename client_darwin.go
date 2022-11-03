@@ -5,6 +5,6 @@ import (
 	"os/exec"
 )
 
-func openDM(team, user string) {
+func openDM(team, user string) error {
 	return exec.Command("open", fmt.Sprintf("slack://user?team=%s&id=%s", team, user)).Start()
 }
