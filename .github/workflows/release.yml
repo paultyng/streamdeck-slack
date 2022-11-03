@@ -43,4 +43,4 @@ jobs:
       - name: Upload Asset
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/com.paultyng.sdPlugin.streamDeckPlugin
+          files: dist/com.paultyng.slack.sdPlugin.streamDeckPlugin
