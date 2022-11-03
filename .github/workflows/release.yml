@@ -28,15 +28,13 @@ jobs:
           GOARCH: amd64 # arm?
         run: |
           go build -o ./com.paultyng.slack.sdPlugin/
-
       - name: Set Version
         run: |
           mv ./com.paultyng.slack.sdPlugin/manifest.json ./manifest.json
           $version = git describe --tags
           $version = $version.Trim("v")
           Write-Output $version
-          jq ".Version='$version'" ./manifest.json > ./com.paultyng.slack.sdPlugin/manifest.json"
-
+          jq ".Version='$version'" ./manifest.json > ./com.paultyng.slack.sdPlugin/manifest.json
       - name: Package Plugin
         run: |
           mkdir -p ./dist/
