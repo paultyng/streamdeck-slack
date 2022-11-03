@@ -29,11 +29,18 @@ jobs:
         run: |
           go build -o ./com.paultyng.slack.sdPlugin/
 
-      # TODO: set version in manifest
+      - name: Set Version
+        run: |
+          mv ./com.paultyng.slack.sdPlugin/manifest.json ./manifest.json
+          $version = git describe --tags
+          $version = $version.Trim("v")
+          Write-Output $version
+          jq ".Version='$version'" ./manifest.json > ./com.paultyng.slack.sdPlugin/manifest.json"
 
       - name: Package Plugin
         run: |
           mkdir -p ./dist/
+          jq . ./com.paultyng.slack.sdPlugin/manifest.json
           ./tools/DistributionTool.exe -b -i ./com.paultyng.slack.sdPlugin -o ./dist/
       - name: Upload Asset
         uses: softprops/action-gh-release@v1
