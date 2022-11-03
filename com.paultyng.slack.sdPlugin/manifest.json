@@ -62,6 +62,7 @@
   "Author": "Paul Tyng",
   "Category": "Slack",
   "CategoryIcon": "categoryIcon",
+  "CodePath": "streamdeck-slack.exe",
   "CodePathWin": "streamdeck-slack.exe",
   "CodePathMac": "streamdeck-slack",
   "Description": "Use Slack with your Stream Deck!",
