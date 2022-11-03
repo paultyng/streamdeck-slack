@@ -28,7 +28,7 @@ jobs:
       - name: Package Plugin
         run: |
           mkdir -p ./dist/
-          ./tools/DistributionTool -b -i com.paultyng.slack.sdPlugin -o ./dist/
+          ./tools/DistributionTool -b -i ./com.paultyng.slack.sdPlugin -o ./dist/
       - name: Upload Asset
         uses: softprops/action-gh-release@v1
         with:
@@ -55,7 +55,7 @@ jobs:
       - name: Package Plugin
         run: |
           mkdir -p ./dist/
-          ./tools/DistributionTool.exe -b -i com.paultyng.slack.sdPlugin -o ./dist/
+          ./tools/DistributionTool.exe -b -i ./com.paultyng.slack.sdPlugin -o ./dist/
       - name: Upload Asset
         uses: softprops/action-gh-release@v1
         with:
