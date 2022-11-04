@@ -3,16 +3,16 @@ package sdk
 import (
 	"flag"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/gorilla/websocket"
 )
 
 var (
 	flagPort  = flag.Int("port", 0, "streamdeck sdk port")
 	flagEvent = flag.String("registerEvent", "", "streamdeck sdk register event")
-	// flagInfo  = flag.String("info", "", "streamdeck application info")
 
 	PluginUUID string
 
@@ -22,6 +22,9 @@ var (
 
 func init() {
 	flag.StringVar(&PluginUUID, "pluginUUID", "", "streamdeck plugin uuid")
+
+	// discard info for now
+	flag.String("info", "", "streamdeck application info")
 }
 
 func Open() error {
@@ -30,7 +33,6 @@ func Open() error {
 	closeSdk = make(chan struct{})
 
 	c, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("ws://localhost:%d", *flagPort), nil)
-
 	if err != nil {
 		return err
 	}
