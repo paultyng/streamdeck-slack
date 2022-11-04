@@ -10,8 +10,10 @@ oauth_config:
   scopes:
     user:
       - users.profile:read
+      # write needed to write custom status
       - users.profile:write
       - users:read
+      # write needed to update presence information
       - users:write
 settings:
   org_deploy_enabled: false
