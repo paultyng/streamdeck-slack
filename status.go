@@ -8,6 +8,7 @@ import (
 	"github.com/valyala/fastjson"
 
 	"streamdeck-slack/internal/sdk"
+	"streamdeck-slack/slackemoji"
 )
 
 const (
@@ -74,16 +75,21 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 		return nil
 	}
 
-	sdk.Log("Checking User profile")
-
-	profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
-	if err != nil {
-		return fmt.Errorf("unable to get user profile: %w", err)
-	}
-
-	sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
-
 	a.init.Do(func() {
+		sdk.Log("Checking User profile")
+
+		profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
+		if err != nil {
+			return fmt.Errorf("unable to get user profile: %w", err)
+		}
+
+		sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
+
+		// is this a unicode emoji? if so, just load the image
+		emojiURL := slackemoji.UnicodeURL(a.emoji)
+		if emojiURL != "" {
+			// look it up in the API...
+		}
 		// TODO: pull emoji images for team if this is a custom/alias
 		// hard code all the unicode emoji in here since no public API to get them
 
