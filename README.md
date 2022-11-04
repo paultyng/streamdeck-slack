@@ -12,11 +12,8 @@ Provided Actions:
 
 ## Installation
 
-There is currently an installation script for Windows (**install.ps1**), eventually I hope to add packaging automation and release this in the marketplace.
+Create a Slack app using the included [manifest](./slack-app/manifest.yml). You can also use the included [icon](./slack-app/icon.png). Once it is created, copy your user token for use is the action button properties.
 
-To use actions in this plugin, you need to create a Slack app with a user token with the following scopes:
+## Developing / Running from Source
 
-- `users.profile:read`
-- `users.profile:write` - for writing custom status
-- `users:read`
-- `users:write` - for updating presence information
+There is currently an installation script for Windows (**install.ps1**).
