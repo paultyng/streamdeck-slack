@@ -10,8 +10,10 @@ import (
 	"streamdeck-slack/internal/sdk"
 )
 
+var debugLog = os.Getenv("STREAMDECK_SLACK_DEBUG") != ""
+
 func main() {
-	if os.Getenv("STREAMDECK_SLACK_DEBUG") != "" {
+	if debugLog {
 		f, err := os.OpenFile("../../logs/com.paultyng.slack.go.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("error opening file: %v", err)
@@ -20,17 +22,26 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	sdk.Log("Starting plugin")
+	sdk.Log("Starting plugin 1")
 	defer func() {
+		if debugLog {
+			log.Printf("Finalizing plugin")
+		}
 		sdk.Log("Finalizing plugin")
 		if err := recover(); err != nil {
+			if debugLog {
+				log.Printf("Recovering from panic: %s", err)
+			}
 			sdk.Log(fmt.Sprintf("Panic: %v", err))
 		}
 	}()
 
 	if err := run(os.Args[1:]); err != nil {
+		if debugLog {
+			log.Printf("error from run: %s", err)
+		}
 		sdk.Log(fmt.Sprintf("error from run: %s", err))
-		log.Fatal(err)
+		os.Exit(3)
 	}
 }
 
@@ -254,11 +265,13 @@ func run(args []string) error {
 		}
 	})
 
+	sdk.Log("Opening Plugin socket")
 	err := sdk.Open()
 	if err != nil {
 		return fmt.Errorf("unable to open SDK: %w", err)
 	}
 
+	sdk.Log("Waiting for program to exit")
 	sdk.Wait()
 
 	return nil
@@ -277,5 +290,9 @@ func handleError(context string, err error) {
 		// ignore any error here
 		_ = sdk.ShowAlert(context)
 	}
-	sdk.Log(fmt.Sprintf("Error: %v", err))
+	if debugLog {
+		// This may double log, but so be it
+		log.Printf("Error: %s", err)
+	}
+	sdk.Log(fmt.Sprintf("Error: %s", err))
 }
