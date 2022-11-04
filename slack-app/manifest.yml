@@ -1,0 +1,19 @@
+display_information:
+  name: Stream Deck
+  description: A Stream Deck plugin for Slack
+  background_color: "#2d2d2d"
+  long_description: >
+    A Stream Deck plugin for Slack, providing actions for users,
+    presence, and status control. More info can be found on the repository:
+    https://github.com/paultyng/streamdeck-slack
+oauth_config:
+  scopes:
+    user:
+      - users.profile:read
+      - users.profile:write
+      - users:read
+      - users:write
+settings:
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
