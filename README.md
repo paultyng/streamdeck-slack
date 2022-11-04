@@ -14,6 +14,8 @@ Provided Actions:
 
 Create a Slack app using the included [manifest](./slack-app/manifest.yml). You can also use the included [icon](./slack-app/icon.png). Once it is created, copy your user token for use is the action button properties.
 
+Download the **.streamDeckPlugin** file from the latest [release](https://github.com/paultyng/streamdeck-slack/releases). This file should already be associated with the Stream Deck app for opening and once its opened, the Slack actions will be available to be added.
+
 ## Developing / Running from Source
 
 There is currently an installation script for Windows (**install.ps1**).
