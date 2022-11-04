@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"image"
 	"image/draw"
@@ -84,11 +85,20 @@ func (a *userAction) updateImage() error {
 	}
 
 	presence, err := a.client.GetUserPresence(a.user)
+	var active *bool = nil
 	if err != nil {
-		return fmt.Errorf("unable to get user presence: %w", err)
+		var slackError *slack.SlackErrorResponse
+		// if we don't have scopes for this, no problem, just don't render
+		// presence info on the button
+		if errors.As(err, &slackError) && slackError.Err != "missing_scope" {
+			return fmt.Errorf("unable to get user presence: %w", err)
+		}
+	} else if presence != nil {
+		b := presence.Presence == "active"
+		active = &b
 	}
 
-	err = a.setProfileImageWithPresence(user.Image192, emojiURL, presence.Presence == "active")
+	err = a.setProfileImageWithPresence(user.Image192, emojiURL, active)
 	if err != nil {
 		return fmt.Errorf("unable to set image: %w", err)
 	}
@@ -198,7 +208,7 @@ func (a *userAction) WillDisappear(*fastjson.Object) error {
 	return nil
 }
 
-func (a *userAction) setProfileImageWithPresence(avatarURL, statusEmojiURL string, active bool) error {
+func (a *userAction) setProfileImageWithPresence(avatarURL, statusEmojiURL string, active *bool) error {
 	profileImage, err := imageFromURL(avatarURL)
 	if err != nil {
 		return fmt.Errorf("unable to download avatar image: %w", err)
@@ -207,15 +217,17 @@ func (a *userAction) setProfileImageWithPresence(avatarURL, statusEmojiURL strin
 	compositeImage := image.NewRGBA(profileImage.Bounds())
 	draw.Draw(compositeImage, profileImage.Bounds(), profileImage, profileImage.Bounds().Min, draw.Src)
 
-	presenceImage := activeImage
-	if !active {
-		presenceImage = awayImage
+	if active != nil {
+		presenceImage := activeImage
+		if !*active {
+			presenceImage = awayImage
+		}
+
+		presenceDstR := compositeImage.Bounds()
+		presenceDstR.Min = presenceDstR.Max.Div(2)
+
+		xdraw.BiLinear.Scale(compositeImage, presenceDstR, presenceImage, presenceImage.Bounds(), xdraw.Over, nil)
 	}
-
-	presenceDstR := compositeImage.Bounds()
-	presenceDstR.Min = presenceDstR.Max.Div(2)
-
-	xdraw.BiLinear.Scale(compositeImage, presenceDstR, presenceImage, presenceImage.Bounds(), xdraw.Over, nil)
 
 	if statusEmojiURL != "" {
 		statusImage, err := imageFromURL(statusEmojiURL)
