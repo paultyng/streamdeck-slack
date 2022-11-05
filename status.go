@@ -84,62 +84,88 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 		return nil
 	}
 
+	var err error
 	a.init.Do(func() {
-		sdk.Log("Checking User profile")
-
-		profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
+		err = a.loadImageStates()
 		if err != nil {
-			handleError(a.context, err)
+			return
 		}
 
-		sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
-
-		// is this a unicode emoji? if so, just load the image
-		emojiURL := slackemoji.UnicodeURL(a.emoji)
-		if emojiURL == "" {
-			// look it up in the API...
-			emojiURL, err = slackemoji.CustomURL(a.team, a.emoji, a.client.GetEmoji)
-			if err != nil {
-				handleError(a.context, err)
-			}
-		}
-
-		if emojiURL != "" {
-			activeImage, err := imageFromURL(emojiURL)
-			if err != nil {
-				handleError(a.context, err)
-			}
-
-			inactiveImage := image.NewGray16(activeImage.Bounds())
-			draw.Draw(inactiveImage, activeImage.Bounds(), activeImage, activeImage.Bounds().Min, draw.Src)
-
-			s := stateInactive
-			err = setImage(a.context, inactiveImage, &s)
-			if err != nil {
-				handleError(a.context, err)
-			}
-
-			s = stateActive
-			err = setImage(a.context, activeImage, &s)
-			if err != nil {
-				handleError(a.context, err)
-			}
-		}
-
-		if profile.StatusEmoji != a.emoji {
-			sdk.Log("Setting inactive state")
-			err := sdk.SetState(a.context, stateInactive)
-			if err != nil {
-				handleError(a.context, fmt.Errorf("unable to set state: %w", err))
-			}
-		} else {
-			sdk.Log("Setting active state")
-			err := sdk.SetState(a.context, stateActive)
-			if err != nil {
-				handleError(a.context, fmt.Errorf("unable to set state: %w", err))
-			}
+		err = a.syncState()
+		if err != nil {
+			return
 		}
 	})
+	if err != nil {
+		return fmt.Errorf("unable to initialize: %w", err)
+	}
+
+	return nil
+}
+
+func (a *statusAction) syncState() error {
+	sdk.Log("Checking User profile")
+
+	profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
+	if err != nil {
+		return fmt.Errorf("unable to get user profile: %w", err)
+	}
+
+	sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
+
+	if profile.StatusEmoji != a.emoji {
+		sdk.Log("Setting inactive state")
+		err := sdk.SetState(a.context, stateInactive)
+		if err != nil {
+			return fmt.Errorf("unable to set state: %w", err)
+		}
+	} else {
+		sdk.Log("Setting active state")
+		err := sdk.SetState(a.context, stateActive)
+		if err != nil {
+			return fmt.Errorf("unable to set state: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (a *statusAction) loadImageStates() error {
+	var err error
+
+	// is this a unicode emoji? if so, just load the image
+	emojiURL := slackemoji.UnicodeURL(a.emoji)
+	if emojiURL == "" {
+		// look it up in the API...
+		emojiURL, err = slackemoji.CustomURL(a.team, a.emoji, a.client.GetEmoji)
+		if err != nil {
+			return fmt.Errorf("unable to get custom emoji URL: %w", err)
+		}
+	}
+
+	if emojiURL == "" {
+		return nil
+	}
+
+	activeImage, err := imageFromURL(emojiURL)
+	if err != nil {
+		return fmt.Errorf("unable to download image: %w", err)
+	}
+
+	inactiveImage := image.NewGray16(activeImage.Bounds())
+	draw.Draw(inactiveImage, activeImage.Bounds(), activeImage, activeImage.Bounds().Min, draw.Src)
+
+	s := stateInactive
+	err = setImage(a.context, inactiveImage, &s)
+	if err != nil {
+		return fmt.Errorf("unable to set inactive image: %w", err)
+	}
+
+	s = stateActive
+	err = setImage(a.context, activeImage, &s)
+	if err != nil {
+		return fmt.Errorf("unable to set active image: %w", err)
+	}
 
 	return nil
 }
@@ -167,6 +193,8 @@ func (a *statusAction) KeyUp(payload *fastjson.Object) error {
 	sdk.Log(fmt.Sprintf("Setting state to %d", toState))
 
 	// TODO: compare state to whatever is set in slack periodically?
+
+	// TODO: sync new state to all the rest of the status actions
 
 	switch toState {
 	case stateInactive:
