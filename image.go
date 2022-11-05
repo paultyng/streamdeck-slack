@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"image"
+	"image/png"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	_ "image/gif"  // gif support for custom emojis
 	_ "image/jpeg" // jpeg support for gravatar proxy
+
+	"streamdeck-slack/internal/sdk"
 )
 
 var (
@@ -34,6 +39,7 @@ func mustDecodeImage(path string) image.Image {
 	return img
 }
 
+// TODO: cache images based on URL in memory
 func imageFromURL(url string) (image.Image, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -54,4 +60,20 @@ func imageFromURL(url string) (image.Image, error) {
 	}
 
 	return img, nil
+}
+
+func setImage(context string, img image.Image, state *int) error {
+	imageDataBuf := bytes.Buffer{}
+	err := png.Encode(&imageDataBuf, img)
+	if err != nil {
+		return fmt.Errorf("unable to encode PNG image: %w", err)
+	}
+
+	imageData := base64.StdEncoding.EncodeToString(imageDataBuf.Bytes())
+
+	err = sdk.SetImage(context, fmt.Sprintf("data:image/png;base64,%s", imageData), 0, state)
+	if err != nil {
+		return fmt.Errorf("unable to set image: %w", err)
+	}
+	return nil
 }

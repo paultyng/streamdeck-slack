@@ -59,11 +59,11 @@ func SetState(context string, state int) error {
 	})
 }
 
-func SetImage(context, imageData string, target int) error {
+func SetImage(context, imageData string, target int, state *int) error {
 	return conn.WriteJSON(&sentEvent{
 		Event:   EventSetImage,
 		Context: context,
-		Payload: &setImagePayload{imageData, target},
+		Payload: &setImagePayload{imageData, target, state},
 	})
 }
 

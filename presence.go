@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"streamdeck-slack/internal/sdk"
 	"sync"
 
 	"github.com/slack-go/slack"
 	"github.com/valyala/fastjson"
+
+	"streamdeck-slack/internal/sdk"
 )
 
 type presenceAction struct {

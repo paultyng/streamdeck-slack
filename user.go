@@ -5,13 +5,9 @@ package main
 // online / offline, current status, etc.
 
 import (
-	"bytes"
-	"encoding/base64"
-	"errors"
 	"fmt"
 	"image"
 	"image/draw"
-	"image/png"
 	"regexp"
 	"time"
 
@@ -86,13 +82,8 @@ func (a *userAction) updateImage() error {
 
 	presence, err := a.client.GetUserPresence(a.user)
 	var active *bool = nil
-	if err != nil {
-		var slackError *slack.SlackErrorResponse
-		// if we don't have scopes for this, no problem, just don't render
-		// presence info on the button
-		if errors.As(err, &slackError) && slackError.Err != "missing_scope" {
-			return fmt.Errorf("unable to get user presence: %w", err)
-		}
+	if err != nil && !isMissingScopeError(err) {
+		return fmt.Errorf("unable to get user presence: %w", err)
 	} else if presence != nil {
 		b := presence.Presence == "active"
 		active = &b
@@ -242,15 +233,7 @@ func (a *userAction) setProfileImageWithPresence(avatarURL, statusEmojiURL strin
 		xdraw.BiLinear.Scale(compositeImage, statusDstR, statusImage, statusImage.Bounds(), xdraw.Over, nil)
 	}
 
-	imageDataBuf := bytes.Buffer{}
-	err = png.Encode(&imageDataBuf, compositeImage)
-	if err != nil {
-		return fmt.Errorf("unable to encode PNG image: %w", err)
-	}
-
-	imageData := base64.StdEncoding.EncodeToString(imageDataBuf.Bytes())
-
-	err = sdk.SetImage(a.context, fmt.Sprintf("data:image/png;base64,%s", imageData), 0)
+	err = setImage(a.context, compositeImage, nil)
 	if err != nil {
 		return fmt.Errorf("unable to set image: %w", err)
 	}
