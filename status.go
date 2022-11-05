@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"image"
+	"image/draw"
 	"sync"
 
 	"github.com/slack-go/slack"
@@ -30,6 +32,7 @@ type statusAction struct {
 	// TODO: we need to make sure not to sync status during a key event
 	// also probably need to check this periodically
 	init sync.Once
+	team string
 }
 
 func (a *statusAction) Initialize(action, context, deviceID string) error {
@@ -67,7 +70,13 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 
 	if a.client == nil && a.apiKey != "" {
 		sdk.Log("Creating Slack client")
-		a.client = slack.New(a.apiKey)
+		client := slack.New(a.apiKey)
+		auth, err := client.AuthTest()
+		if err != nil {
+			return fmt.Errorf("unable to auth test: %w", err)
+		}
+		a.client = client
+		a.team = auth.TeamID
 		changes = true
 	}
 
@@ -80,18 +89,42 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 
 		profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
 		if err != nil {
-			return fmt.Errorf("unable to get user profile: %w", err)
+			handleError(a.context, err)
 		}
 
 		sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
 
 		// is this a unicode emoji? if so, just load the image
 		emojiURL := slackemoji.UnicodeURL(a.emoji)
-		if emojiURL != "" {
+		if emojiURL == "" {
 			// look it up in the API...
+			emojiURL, err = slackemoji.CustomURL(a.team, a.emoji, a.client.GetEmoji)
+			if err != nil {
+				handleError(a.context, err)
+			}
 		}
-		// TODO: pull emoji images for team if this is a custom/alias
-		// hard code all the unicode emoji in here since no public API to get them
+
+		if emojiURL != "" {
+			activeImage, err := imageFromURL(emojiURL)
+			if err != nil {
+				handleError(a.context, err)
+			}
+
+			inactiveImage := image.NewGray16(activeImage.Bounds())
+			draw.Draw(inactiveImage, activeImage.Bounds(), activeImage, activeImage.Bounds().Min, draw.Src)
+
+			s := stateInactive
+			err = setImage(a.context, inactiveImage, &s)
+			if err != nil {
+				handleError(a.context, err)
+			}
+
+			s = stateActive
+			err = setImage(a.context, activeImage, &s)
+			if err != nil {
+				handleError(a.context, err)
+			}
+		}
 
 		if profile.StatusEmoji != a.emoji {
 			sdk.Log("Setting inactive state")

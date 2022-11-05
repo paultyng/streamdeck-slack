@@ -10,7 +10,8 @@ import (
 	"streamdeck-slack/internal/sdk"
 )
 
-var debugLog = os.Getenv("STREAMDECK_SLACK_DEBUG") != ""
+// var debugLog = os.Getenv("STREAMDECK_SLACK_DEBUG") != ""
+var debugLog = true
 
 func main() {
 	if debugLog {
@@ -22,7 +23,7 @@ func main() {
 		log.SetOutput(f)
 	}
 
-	sdk.Log("Starting plugin 1")
+	sdk.Log("Starting plugin")
 	defer func() {
 		if debugLog {
 			log.Printf("Finalizing plugin")

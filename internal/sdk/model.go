@@ -37,6 +37,7 @@ type setStatePayload struct {
 type setImagePayload struct {
 	Image  string `json:"image"`
 	Target int    `json:"target"`
+	State  *int   `json:"state,omitempty"`
 }
 
 // Events
