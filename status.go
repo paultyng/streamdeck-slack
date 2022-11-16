@@ -84,36 +84,37 @@ func (a *statusAction) UpdateSettings(settings *fastjson.Object) error {
 		return nil
 	}
 
-	var err error
+	var initErr error
 	a.init.Do(func() {
-		err = a.loadImageStates()
-		if err != nil {
+		initErr = a.loadImageStates()
+		if initErr != nil {
 			return
 		}
 
-		err = a.syncState()
+		sdk.Log("Checking User profile")
+
+		profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
 		if err != nil {
+			initErr = fmt.Errorf("unable to get user profile: %w", err)
+			return
+		}
+
+		sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
+
+		initErr = a.syncState(profile.StatusEmoji)
+		if initErr != nil {
 			return
 		}
 	})
-	if err != nil {
-		return fmt.Errorf("unable to initialize: %w", err)
+	if initErr != nil {
+		return fmt.Errorf("unable to initialize: %w", initErr)
 	}
 
 	return nil
 }
 
-func (a *statusAction) syncState() error {
-	sdk.Log("Checking User profile")
-
-	profile, err := a.client.GetUserProfile(&slack.GetUserProfileParameters{})
-	if err != nil {
-		return fmt.Errorf("unable to get user profile: %w", err)
-	}
-
-	sdk.Log(fmt.Sprintf("Current status emoji: %q", profile.StatusEmoji))
-
-	if profile.StatusEmoji != a.emoji {
+func (a *statusAction) syncState(currentStatusEmoji string) error {
+	if currentStatusEmoji != a.emoji {
 		sdk.Log("Setting inactive state")
 		err := sdk.SetState(a.context, stateInactive)
 		if err != nil {
